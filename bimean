@@ -1,0 +1,86 @@
+# Program to compute biweight mean
+
+from astropy.io import ascii
+import numpy as np
+from numpy import array
+import matplotlib.pylab as plt 
+import scipy as scipy
+from scipy import stats
+import math
+
+
+# Read in data
+data = open('/Users/TheLuggage/anaconda2/data_mindy.v2.dat', 'r') 
+lines = data.readlines()[1:] # start reading at line 2
+
+data.close() 
+
+# Create array
+x = []
+y = []
+dy = []
+w = []
+# s = []
+
+
+# Append data to the array
+for line in lines:
+    p = line.split()
+    x.append(float(p[0]))
+    y.append(float(p[1]))
+    dy.append(float(p[2])) 
+    
+# s = np.random.normal(0,1,20)   
+    
+# Create a vector
+xVec = np.array(x)
+yVec = np.array(y)
+dyVec = np.array(dy) 
+# sVec = np.array(s)
+
+
+# Function to compute median
+def median(yVec):
+	# Sort Array
+	sorted = np.sort(yVec)
+# 	print(sorted)
+	if len(sorted) % 2. == 0. :
+		midhigh = len(sorted)//2 + 1
+		midlow = len(sorted)//2
+# 		print(midhigh)
+# 		print(midlow)
+		return (sorted[midhigh] + sorted[midlow])*0.5
+	else:
+		return sorted[len(sorted)/2]
+		
+		
+# Function fo compute MAD
+def mad(yVec):
+	mad = 0.
+	mad = median(abs(yVec - median(yVec)))
+# 	print("mad is", mad)
+	return mad
+	
+
+# Compute Biweight Mean
+# bimean = median + sum((x - median)(1-u^2)^2) / sum((1-u^2)^2)
+def bimean(yVec):
+	# create u array
+	u = []
+	c = 6.0
+	u = (yVec - median(yVec)) / (c*mad(yVec))
+	uVec = np.array(u)
+	
+	# calculate numerator and denominatory
+	a = []
+	a = (yVec[np.where(np.absolute(uVec) < 1.)] - median(yVec)) * (1. - uVec[np.where(np.absolute(uVec) < 1.)]**2.)**2.
+	asum = np.sum(a)
+
+	b = []
+	b = (1. - uVec[np.where(np.absolute(uVec) < 1.)]**2.)**2.
+	bsum = np.sum(b)
+
+	bimean = 	bimean = median(yVec) + asum/bsum
+	return bimean
+	
+print("bimean is ", bimean(yVec))
