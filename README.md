@@ -1,0 +1,2 @@
+# starterprojects
+Introductory school projcts
